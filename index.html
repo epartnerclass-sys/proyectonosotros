@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Conectando desde el Respeto - Farmeando Aura</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        celeste: '#38bdf8', 
+                        celesteBorder: '#0284c7', 
+                        amarillo: '#facc15', 
+                        amarilloBorder: '#ca8a04', 
+                        grisClaro: '#f3f4f6', 
+                        grisMedio: '#e5e7eb', 
+                        grisBorde: '#d1d5db', 
+                        grisOscuro: '#9ca3af', 
+                        textoOscuro: '#1f2937', 
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            overflow-x: hidden;
+            background-color: #f8fafc;
+            -webkit-tap-highlight-color: transparent;
+            /* BLINDAJE ANTICOPIA */
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        .modal-enter { transform: translateY(0) !important; opacity: 1 !important; pointer-events: auto !important; }
+        .modal-leave { transform: translateY(120%) !important; opacity: 0 !important; pointer-events: none !important; }
+
+        .modal-content-scroll::-webkit-scrollbar { display: none; }
+        .modal-content-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-bounce-in {
+            animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes auraGlow {
+            0% { box-shadow: 0 0 5px #facc15, 0 0 10px #facc15; }
+            50% { box-shadow: 0 0 20px #facc15, 0 0 30px #ca8a04; }
+            100% { box-shadow: 0 0 5px #facc15, 0 0 10px #facc15; }
+        }
+        .aura-active {
+            animation: auraGlow 2s infinite;
+        }
+    </style>
+</head>
+<body class="font-sans text-textoOscuro antialiased flex flex-col min-h-screen relative">
+
+    <!-- Header Fijo -->
+    <header class="fixed top-0 left-0 w-full bg-white z-40 shadow-sm border-b-4 border-grisMedio">
+        <div class="max-w-md mx-auto px-4 py-3 flex items-center gap-3">
+            <div class="w-12 h-12 bg-celeste border-2 border-celesteBorder rounded-xl flex items-center justify-center shrink-0">
+                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <h1 class="font-black text-lg leading-tight text-textoOscuro">Conectando desde el Respeto</h1>
+                <p class="text-[11px] text-amarilloBorder font-black uppercase tracking-widest mt-0.5 flex items-center gap-1">
+                    <span>✨</span> Rutina de Aura
+                </p>
+            </div>
+        </div>
+        
+        <!-- Barra de Progreso -->
+        <div class="w-full h-3 bg-grisClaro flex items-center relative border-t border-grisMedio">
+            <div id="progress-fill" class="h-full bg-amarillo transition-all duration-700 ease-out w-0 relative border-r-2 border-amarilloBorder">
+                <div class="absolute top-0 right-0 bottom-0 left-0 bg-white/40"></div>
+            </div>
+            <div id="progress-text" class="absolute right-4 text-[10px] font-black text-grisOscuro transform -translate-y-5 bg-white px-3 py-0.5 rounded-full border-2 border-grisBorde shadow-sm z-10 flex items-center gap-1">
+                0 / 600 Aura
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-md mx-auto w-full px-5 pt-[120px] pb-10 flex flex-col items-center relative z-10">
+        
+        <!-- Mensaje Inicial -->
+        <div class="bg-white border-4 border-celesteBorder rounded-2xl p-5 mb-8 text-center shadow-sm relative w-full overflow-hidden">
+            <div class="absolute top-0 left-0 w-3 h-full bg-celeste border-r-4 border-celesteBorder"></div>
+            <h2 class="text-xl font-black mb-2 text-textoOscuro uppercase tracking-wide">¡A Farmear Aura! ✨</h2>
+            <p class="text-sm text-gray-600 leading-relaxed font-medium">
+                Completa estas acciones a lo largo del día para acumular aura positiva y construir una conexión más fuerte. 
+                <span class="font-black text-celesteBorder block mt-2 text-base">Toca el primer momento 👇</span>
+            </p>
+        </div>
+
+        <!-- Puzzle de Momentos -->
+        <div id="puzzle-container" class="flex flex-col relative w-full max-w-[340px] pb-10">
+            <!-- JS inyecta las piezas aquí -->
+        </div>
+
+        <button onclick="openReferences()" class="mt-4 bg-white border-4 border-grisBorde text-textoOscuro font-black py-4 px-6 rounded-2xl w-full flex items-center justify-center gap-2 hover:bg-grisClaro transition-colors active:scale-95 relative z-10">
+            <svg class="w-6 h-6 text-grisOscuro" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+            Ver Referencias
+        </button>
+    </main>
+
+    <footer class="bg-grisMedio py-8 text-center w-full mt-auto border-t-4 border-grisBorde relative z-10">
+        <div class="max-w-md mx-auto px-4">
+            <p class="text-sm text-textoOscuro font-black uppercase tracking-wide">Organización Crecer con Empatía</p>
+            <p class="text-xs text-gray-600 mt-2 font-semibold">Todos los derechos reservados &copy; <span id="current-year"></span></p>
+        </div>
+    </footer>
+
+    <!-- Fondo Modales -->
+    <div id="modal-backdrop" class="fixed inset-0 bg-gray-900/80 z-[60] hidden transition-opacity duration-300 opacity-0 backdrop-blur-sm" onclick="closeAllModals()"></div>
+
+    <!-- Modal del Momento -->
+    <div id="day-modal" class="fixed bottom-8 sm:bottom-12 inset-x-0 mx-auto w-[92%] max-w-md h-auto max-h-[85vh] bg-white rounded-[36px] overflow-hidden z-[70] transform modal-leave transition-all duration-300 ease-out flex flex-col shadow-2xl border-4 border-grisBorde">
+        
+        <div class="w-full flex justify-center pt-3 pb-2 cursor-pointer shrink-0" onclick="closeAllModals()">
+            <div class="w-16 h-2 bg-grisBorde rounded-full"></div>
+        </div>
+        
+        <button onclick="closeAllModals()" class="absolute top-5 right-5 w-10 h-10 flex items-center justify-center bg-grisClaro border-2 border-grisBorde text-textoOscuro rounded-full hover:bg-grisMedio transition-colors z-10 active:scale-95">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <div class="flex-1 modal-content-scroll overflow-y-auto px-6 pb-6 mt-2">
+            
+            <div class="mb-5 flex flex-col items-start pr-10">
+                <span id="modal-day-badge" class="inline-flex items-center gap-1 bg-celeste border-2 border-celesteBorder text-white text-xs font-black px-3.5 py-1.5 rounded-xl mb-2.5 shadow-sm">...</span>
+                <h2 id="modal-title" class="text-2xl font-black text-textoOscuro leading-tight">...</h2>
+            </div>
+
+            <!-- Reto del Momento -->
+            <div class="mb-5">
+                <h3 class="text-sm font-black uppercase tracking-wider text-grisOscuro mb-2.5 flex items-center gap-1.5">
+                    <span class="text-base">🎯</span> Tu Acción del Momento
+                </h3>
+                <div class="bg-grisClaro/60 border-4 border-celesteBorder p-4 rounded-2xl shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-2 h-full bg-celeste"></div>
+                    <p id="modal-challenge" class="text-base text-textoOscuro leading-relaxed font-bold pl-2"></p>
+                </div>
+            </div>
+
+            <!-- CONTENEDOR DEL BOTÓN DE VIDEO -->
+            <div id="modal-video-wrapper" class="w-full hidden mb-2">
+                <!-- JS inyecta el botón lindo de video aquí -->
+            </div>
+        </div>
+
+        <!-- Botón Inferior -->
+        <div class="w-full bg-white p-5 border-t-4 border-grisBorde shrink-0 rounded-b-[32px]">
+            <button id="btn-complete" onclick="toggleCurrentDay()" class="w-full py-4 rounded-2xl font-black text-lg transition-all duration-300 flex items-center justify-center gap-3 transform active:scale-95 shadow-sm">
+                <!-- JS Inyecta texto -->
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Referencias -->
+    <div id="refs-modal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-sm bg-white border-4 border-grisBorde rounded-3xl p-6 z-[70] shadow-2xl hidden opacity-0 transition-opacity duration-300">
+        <div class="w-14 h-14 bg-grisClaro border-2 border-grisBorde rounded-2xl flex items-center justify-center mb-5 text-textoOscuro">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+        </div>
+        <h3 class="text-2xl font-black text-textoOscuro mb-3">Referencias</h3>
+        <p class="text-base text-gray-700 mb-6 leading-relaxed font-medium">
+            Este reto interactivo está basado conceptualmente en los principios de crianza respetuosa del libro 
+            <span class="font-black text-textoOscuro underline decoration-celeste decoration-4">"Cómo hablar para que los niños escuchen..."</span> de Faber y Mazlish.
+        </p>
+        <button onclick="closeAllModals()" class="w-full bg-grisClaro text-textoOscuro font-black py-4 rounded-xl border-4 border-grisBorde hover:bg-grisMedio transition-colors active:scale-95">
+            Entendido
+        </button>
+    </div>
+
+    <script>
+        var challengeData = [
+            {
+                timeTitle: "Al despertar",
+                title: "Paciencia Matutina",
+                challenge: "Farmear aura con paciencia, sin empezar el día a los gritos.",
+                videoUrl: "https://drive.google.com/file/d/16_v-ljH82Rn8-izPZu4blVDRCNpsD3og/view?usp=drivesdk", 
+                aura: 100,
+                icon: "🌅"
+            },
+            {
+                timeTitle: "Antes de ir a la escuela",
+                title: "Escucha Activa",
+                challenge: "Escuchar si el chico expresa miedo, enojo o preocupación.",
+                videoUrl: "https://drive.google.com/file/d/1nabSv5z3Clu5qFKW16Pw1MG35ZQ-26e2/view?usp=drivesdk", 
+                aura: 100,
+                icon: "🎒"
+            },
+            {
+                timeTitle: "Al volver del colegio",
+                title: "Conexión Primero",
+                challenge: "Preguntar y escuchar antes de interrogar o dar consejos.",
+                videoUrl: "https://drive.google.com/file/d/1vjqWrsYpltg20ow5JTd6rYB4hJLvsyZK/view?usp=drivesdk",
+                aura: 100,
+                icon: "🏠"
+            },
+            {
+                timeTitle: "Durante las tareas",
+                title: "Acompañar sin Etiquetas",
+                challenge: "Acompañar sin etiquetar al chico como vago o irresponsable.",
+                videoUrl: "https://drive.google.com/file/d/1HBs8ofTHo68YPPfqh_jCy_6KRraVjNX8/view?usp=drivesdk",
+                aura: 100,
+                icon: "📚"
+            },
+            {
+                timeTitle: "En un conflicto",
+                title: "Límites con Empatía",
+                challenge: "Reconocer la emoción y sostener el límite.",
+                videoUrl: "https://drive.google.com/file/d/1buf5-HQWjuL0fuoo6zdjTIp7TBuXMQLA/view?usp=drivesdk",
+                aura: 100,
+                icon: "⚖️"
+            },
+            {
+                timeTitle: "Antes de dormir",
+                title: "Reparación y Gratitud",
+                challenge: "Recuperar una conversación pendiente, agradecer o reparar.",
+                videoUrl: "https://drive.google.com/file/d/1ZOWi3NGJdcTg5xOrcPwv4vB490fS7McD/view?usp=drivesdk",
+                aura: 100,
+                icon: "🌙"
+            }
+        ];
+
+        var completedDays = [false, false, false, false, false, false];
+        var currentActiveDay = null;
+
+        function esDispositivoAndroid() {
+            return /Android/i.test(navigator.userAgent);
+        }
+
+        function obtenerUrlReproduccion(url) {
+            if (!url) return "";
+            var match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                var fileId = match[1];
+                var viewUrl = "https://drive.google.com/file/d/" + fileId + "/view";
+                
+                // En Android forzamos el Intent nativo hacia la app de Google Drive
+                // (Esto lanza el selector de cuenta de Google igual que al abrir desde WhatsApp)
+                if (esDispositivoAndroid()) {
+                    return "intent://drive.google.com/file/d/" + fileId + "/view#Intent;scheme=https;package=com.google.android.apps.docs;S.browser_fallback_url=" + encodeURIComponent(viewUrl) + ";end";
+                }
+                return viewUrl;
+            }
+            return url;
+        }
+
+        function renderPuzzle() {
+            var container = document.getElementById('puzzle-container');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            var knobPositions = ['30%', '70%', '40%', '60%', '30%', '50%'];
+
+            for (var index = 0; index < challengeData.length; index++) {
+                var day = challengeData[index];
+                var isCompleted = completedDays[index];
+                var isLast = index === challengeData.length - 1;
+                
+                var bgColor = isCompleted ? 'bg-celeste' : 'bg-white';
+                var borderColor = isCompleted ? 'border-celesteBorder' : 'border-grisBorde';
+                var textColor = isCompleted ? 'text-white' : 'text-textoOscuro';
+                var titleColor = isCompleted ? 'text-white' : 'text-celesteBorder';
+                
+                var auraBadge = isCompleted 
+                    ? '<span class="bg-amarillo text-amarilloBorder font-black text-[10px] px-2 py-0.5 rounded-full shadow-sm ml-2 border border-amarilloBorder">+' + day.aura + ' Aura</span>'
+                    : '<span class="bg-white text-grisOscuro font-black text-[10px] px-2 py-0.5 rounded-full shadow-sm ml-2 border border-grisBorde">' + day.aura + ' Aura</span>';
+
+                var zIndex = 10 - index;
+                var marginTop = index === 0 ? 'mt-0' : '-mt-4';
+                var knobLeft = knobPositions[index];
+
+                var knobHTML = '';
+                if (!isLast) {
+                    knobHTML = '<div class="absolute -bottom-[20px] w-10 h-10 rounded-full border-4 ' + borderColor + ' ' + bgColor + ' z-10" style="left: ' + knobLeft + '; transform: translateX(-50%); clip-path: inset(45% -10% -10% -10%);"></div>' +
+                               '<div class="absolute bottom-0 w-8 h-2 ' + bgColor + ' z-20" style="left: ' + knobLeft + '; transform: translateX(-50%);"></div>';
+                }
+
+                var subtitleText = isCompleted ? 'Logrado 🎉' : 'Toca para descubrir 👆';
+
+                var pieceHTML = '<div onclick="openDayModal(' + index + ')" class="relative w-full h-[125px] flex items-center px-4 rounded-[28px] border-4 ' + borderColor + ' ' + bgColor + ' ' + textColor + ' transition-transform active:scale-95 mx-auto ' + marginTop + ' shadow-sm cursor-pointer" style="z-index: ' + zIndex + ';">' +
+                                '<div class="flex-1 flex items-center gap-3 relative z-30 w-full pointer-events-none">' +
+                                    '<div class="w-14 h-14 shrink-0 rounded-2xl flex flex-col items-center justify-center bg-grisClaro/30 border-2 border-grisBorde/40 shadow-inner text-2xl">' + day.icon + '</div>' +
+                                    '<div class="flex-1 pr-1 overflow-hidden">' +
+                                        '<p class="text-[10px] font-black uppercase tracking-widest opacity-90 leading-none mb-1 ' + titleColor + '">' + day.timeTitle + '</p>' +
+                                        '<h3 class="font-black text-[15px] leading-tight mb-1 truncate">' + day.title + '</h3>' +
+                                        '<p class="text-[12px] opacity-90 font-bold flex items-center">' + subtitleText + auraBadge + '</p>' +
+                                    '</div>' +
+                                '</div>' + knobHTML + '</div>';
+                
+                container.innerHTML += pieceHTML;
+            }
+        }
+
+        function updateProgress() {
+            var totalEarned = 0;
+            var totalPossible = 0;
+
+            for (var i = 0; i < challengeData.length; i++) {
+                totalPossible += challengeData[i].aura;
+                if (completedDays[i]) {
+                    totalEarned += challengeData[i].aura;
+                }
+            }
+
+            var percentage = Math.round((totalEarned / totalPossible) * 100);
+            document.getElementById('progress-fill').style.width = percentage + '%';
+            
+            var progressText = document.getElementById('progress-text');
+            progressText.innerHTML = '✨ ' + totalEarned + ' / ' + totalPossible + ' Aura';
+            
+            if (percentage > 0) {
+                progressText.className = "absolute right-4 text-[10px] font-black transform -translate-y-5 bg-white px-3 py-0.5 rounded-full shadow-sm z-10 flex items-center gap-1 text-amarilloBorder border-2 border-amarilloBorder";
+            } else {
+                progressText.className = "absolute right-4 text-[10px] font-black transform -translate-y-5 bg-white px-3 py-0.5 rounded-full shadow-sm z-10 flex items-center gap-1 text-grisOscuro border-2 border-grisBorde";
+            }
+        }
+
+        function openDayModal(index) {
+            currentActiveDay = index;
+            var dayInfo = challengeData[index];
+            var isCompleted = completedDays[index];
+
+            document.getElementById('modal-day-badge').innerHTML = dayInfo.icon + ' <span class="ml-1 uppercase tracking-widest">' + dayInfo.timeTitle + '</span>';
+            document.getElementById('modal-title').innerText = dayInfo.title;
+            document.getElementById('modal-challenge').innerText = dayInfo.challenge;
+
+            var videoWrapper = document.getElementById('modal-video-wrapper');
+            
+            if (dayInfo.videoUrl && dayInfo.videoUrl !== "") {
+                var finalVideoUrl = obtenerUrlReproduccion(dayInfo.videoUrl);
+                var targetAttr = esDispositivoAndroid() ? '' : 'target="_blank" rel="noopener noreferrer"';
+                videoWrapper.classList.remove('hidden');
+                
+                videoWrapper.innerHTML = `
+                    <a href="${finalVideoUrl}" ${targetAttr} class="w-full bg-textoOscuro hover:bg-gray-800 text-white border-4 border-gray-900 rounded-2xl p-4 flex items-center justify-between gap-4 shadow-[0_4px_0_#0f172a] active:translate-y-1 active:shadow-none transition-all cursor-pointer group text-left no-underline">
+                        <div class="flex items-center gap-3.5 pointer-events-none">
+                            <div class="relative flex items-center justify-center">
+                                <span class="absolute w-12 h-12 bg-amarillo/30 rounded-full animate-ping"></span>
+                                <div class="w-12 h-12 bg-amarillo border-2 border-amarilloBorder rounded-xl flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                                    <svg class="w-6 h-6 text-textoOscuro ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-black uppercase tracking-widest text-amarillo block mb-0.5">🎬 Recurso Visual</span>
+                                <span class="font-black text-base leading-tight block text-white">Ver Microvideo del Momento</span>
+                                <span class="text-xs text-grisMedio font-medium block mt-0.5">Se abrirá en pantalla completa</span>
+                            </div>
+                        </div>
+                        <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0 pointer-events-none group-hover:bg-white/20 transition-colors">
+                            <svg class="w-5 h-5 text-amarillo" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        </div>
+                    </a>
+                `;
+            } else {
+                videoWrapper.classList.add('hidden');
+                videoWrapper.innerHTML = '';
+            }
+
+            var btn = document.getElementById('btn-complete');
+            if (isCompleted) {
+                btn.innerHTML = '<div class="w-7 h-7 bg-amarillo rounded-full flex items-center justify-center border-2 border-amarilloBorder shadow-sm pointer-events-none"><svg class="w-5 h-5 text-textoOscuro" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path></svg></div><span class="pointer-events-none">Aura Recolectada (+' + dayInfo.aura + ')</span>';
+                btn.className = "w-full py-4 rounded-2xl font-black text-xl transition-all duration-300 flex items-center justify-center gap-3 transform active:scale-95 bg-white text-amarilloBorder border-4 border-amarilloBorder shadow-[0_4px_0_#ca8a04]";
+            } else {
+                btn.innerHTML = '<span class="pointer-events-none">✨ Farmear +' + dayInfo.aura + ' Aura</span>';
+                btn.className = "w-full py-4 rounded-2xl font-black text-xl transition-all duration-300 flex items-center justify-center gap-3 transform active:scale-95 bg-celeste text-white border-4 border-celesteBorder shadow-[0_4px_0_#0284c7] hover:brightness-105 aura-active";
+            }
+
+            document.getElementById('modal-backdrop').classList.remove('hidden');
+            setTimeout(function() {
+                document.getElementById('modal-backdrop').classList.remove('opacity-0');
+                var modal = document.getElementById('day-modal');
+                modal.classList.remove('modal-leave');
+                modal.classList.add('modal-enter');
+            }, 10);
+        }
+
+        function toggleCurrentDay() {
+            if (currentActiveDay !== null) {
+                completedDays[currentActiveDay] = !completedDays[currentActiveDay];
+                
+                renderPuzzle();
+                updateProgress();
+                
+                if (completedDays[currentActiveDay]) {
+                    openDayModal(currentActiveDay); 
+                    
+                    var container = document.getElementById('puzzle-container');
+                    container.classList.remove('animate-bounce-in');
+                    void container.offsetWidth; 
+                    container.classList.add('animate-bounce-in');
+
+                    setTimeout(function() {
+                        closeAllModals();
+                    }, 800);
+                } else {
+                    openDayModal(currentActiveDay);
+                }
+            }
+        }
+
+        function openReferences() {
+            document.getElementById('modal-backdrop').classList.remove('hidden');
+            document.getElementById('refs-modal').classList.remove('hidden');
+            
+            setTimeout(function() {
+                document.getElementById('modal-backdrop').classList.remove('opacity-0');
+                document.getElementById('refs-modal').classList.remove('opacity-0');
+            }, 10);
+        }
+
+        function closeAllModals() {
+            var dayModal = document.getElementById('day-modal');
+            dayModal.classList.remove('modal-enter');
+            dayModal.classList.add('modal-leave');
+
+            document.getElementById('modal-backdrop').classList.add('opacity-0');
+            document.getElementById('refs-modal').classList.add('opacity-0');
+            
+            setTimeout(function() {
+                document.getElementById('modal-video-wrapper').innerHTML = '';
+                document.getElementById('modal-backdrop').classList.add('hidden');
+                document.getElementById('refs-modal').classList.add('hidden');
+                currentActiveDay = null;
+            }, 300);
+        }
+
+        function initApp() {
+            var yearEl = document.getElementById('current-year');
+            if (yearEl) yearEl.innerText = new Date().getFullYear();
+            renderPuzzle();
+            updateProgress();
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+
+        // Blindaje Anticopia
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || e.keyCode === 123) e.preventDefault();
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i')) e.preventDefault();
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u')) e.preventDefault();
+        });
+        document.addEventListener('dragstart', function(e) { e.preventDefault(); });
+    </script>
+</body>
+</html>
